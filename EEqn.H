@@ -1,6 +1,6 @@
 {
     volScalarField& he = thermo.he();
-
+	dimensionedScalar L("L", dimEnergy/dimMass, L_);
     fvScalarMatrix EEqn
     (
         fvm::ddt(rho, he) + fvm::div(phi, he)
@@ -18,6 +18,7 @@
       - fvm::laplacian(turbulence->alphaEff(), he)
      ==
         rho*(U&g)
+	  + L*(fvc::ddt(rho, alpha1_));
       + radiation->Sh(thermo, he)
       + fvOptions(rho, he)
     );
