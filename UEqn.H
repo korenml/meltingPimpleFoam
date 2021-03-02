@@ -7,6 +7,7 @@
         fvm::ddt(rho, U) + fvm::div(phi, U)
       + MRF.DDt(rho, U)
       + turbulence->divDevRhoReff(U)
+	  + fvm:SuSp(DCu, U)
      ==
         fvOptions(rho, U)
     );

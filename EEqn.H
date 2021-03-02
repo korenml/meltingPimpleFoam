@@ -1,6 +1,5 @@
 {
     volScalarField& he = thermo.he();
-	dimensionedScalar L("L", dimEnergy/dimMass, L_);
     fvScalarMatrix EEqn
     (
         fvm::ddt(rho, he) + fvm::div(phi, he)
@@ -16,9 +15,9 @@
           : -dpdt
         )
       - fvm::laplacian(turbulence->alphaEff(), he)
+	  + L*(fvc::ddt(rho, alphaL))
      ==
         rho*(U&g)
-	  + L*(fvc::ddt(rho, alpha1_));
       + radiation->Sh(thermo, he)
       + fvOptions(rho, he)
     );
@@ -33,4 +32,10 @@
 
     thermo.correct();
     radiation->correct();
+	// Recalculate liquid content alpha
+	volScalarField& alphaLold = alphaL;
+	alphaL = min(0, max(1, alphaL + relax*CpS*(T-Tmelt)/L));
+	alphaL.correctBoundaryConditions();
+
+	DCu = Cu*pow(1.0-alphaL, 2)/(pow(alphaL, 3)+q);
 }
