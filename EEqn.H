@@ -15,9 +15,9 @@
           : -dpdt
         )
       - fvm::laplacian(turbulence->alphaEff(), he)
-	  + L*(fvc::ddt(rho, alphaL))
      ==
         rho*(U&g)
+	  - L*(fvc::ddt(rho, alphaL))
       + radiation->Sh(thermo, he)
       + fvOptions(rho, he)
     );
@@ -33,9 +33,10 @@
     thermo.correct();
     radiation->correct();
 	// Recalculate liquid content alpha
-	volScalarField& alphaLold = alphaL;
-	alphaL = min(0, max(1, alphaL + relax*CpS*(T-Tmelt)/L));
-	alphaL.correctBoundaryConditions();
+//	const volScalarField& T_ = thermo.T(); //mesh.lookupObject<volScalarField>("T");
+	volScalarField alphaLnew =  alphaL + relaxAlpha*thermo.Cp()*(thermo.T()-Tmelt)/L;
+	alphaL = max(scalar(0), min(scalar(1), alphaLnew));
+	//alphaL.correctBoundaryConditions();
 
-	DCu = Cu*pow(1.0-alphaL, 2)/(pow(alphaL, 3)+q);
+	//DCu = rho*Cu*pow(1.0-alphaL, 2)/(pow(alphaL, 3)+q);
 }

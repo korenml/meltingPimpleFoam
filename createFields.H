@@ -142,13 +142,19 @@ dimensionedScalar L(smProperties.lookup("L"));
 // Reading solid heat capacity
 dimensionedScalar cpS(smProperties.lookup("cp"));
 // Reading thermal conductivity
-dimensionedScalar lambdaS(smProperties.lookup("lambda"));
+dimensionedScalar lambdaS(smProperties.lookup("lambdaS"));
 // Reading melting temperature
 dimensionedScalar Tmelt(smProperties.lookup("Tmelt"));
-// Reading meshi region momentum sink coefficient default is 10
-dimensionedScalar Cu_(smProperties.lookup("Cu"));
+// Reading mushy region momentum sink coefficient default is 1e5
+dimensionedScalar Cu(smProperties.lookup("Cu"));
 // Reading porosity coefficient
-dimensionedScalar q(smProperties.lookup("q"));
+dimensionedScalar qD(smProperties.lookup("qD"));
+// Reading relaxation coefficient 0.9
+dimensionedScalar relaxAlpha(smProperties.lookup("relaxAlpha"));
+// Reading reference density
+dimensionedScalar rhoRef(smProperties.lookup("rhoRef"));
+// Reading beta coeff
+dimensionedScalar beta(smProperties.lookup("beta"));
 // Creating momentum sink term
 volScalarField DCu
 (
@@ -160,5 +166,5 @@ volScalarField DCu
         IOobject::NO_READ,
         IOobject::NO_WRITE
     ),
-    Cu*pow(1.0-alphaL, 2)/(pow(alphaL, 3)+q)
+    rho*Cu*pow(1.0-alphaL, 2)/(pow(alphaL, 3)+qD)
 );
