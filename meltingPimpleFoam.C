@@ -85,7 +85,6 @@ int main(int argc, char *argv[])
         ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
-
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop

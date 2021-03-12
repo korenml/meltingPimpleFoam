@@ -1,5 +1,11 @@
 {
+for (int tCorr=0; tCorr<nThermoCorr; tCorr++)
+{
+
     volScalarField& he = thermo.he();
+	volScalarField alphaLNew = alphaL;
+    volScalarField alphaL0 = alphaL;	
+	//const volScalarField& T_ = thermo.T();
     fvScalarMatrix EEqn
     (
         fvm::ddt(rho, he) + fvm::div(phi, he)
@@ -16,8 +22,8 @@
         )
       - fvm::laplacian(turbulence->alphaEff(), he)
      ==
-        rho*(U&g)
-	  - L*(fvc::ddt(rho, alphaL))
+	  - L*fvc::ddt(rho,alphaL)
+      +  rho*(U&g)
       + radiation->Sh(thermo, he)
       + fvOptions(rho, he)
     );
@@ -32,11 +38,27 @@
 
     thermo.correct();
     radiation->correct();
-	// Recalculate liquid content alpha
-//	const volScalarField& T_ = thermo.T(); //mesh.lookupObject<volScalarField>("T");
-	volScalarField alphaLnew =  alphaL + relaxAlpha*thermo.Cp()*(thermo.T()-Tmelt)/L;
-	alphaL = max(scalar(0), min(scalar(1), alphaLnew));
-	//alphaL.correctBoundaryConditions();
 
-	//DCu = rho*Cu*pow(1.0-alphaL, 2)/(pow(alphaL, 3)+q);
+	alphaLNew = alphaL + relaxAlpha*cpS/L*(thermo.T()-Tmelt);
+	alphaL = max(scalar(0), min(scalar(1), alphaLNew));
+	alphaL.correctBoundaryConditions();
+
+    // Check for phase fraction convergence
+    scalarField residualField
+    (
+        mag(alphaL.internalField() - alphaL0.internalField())
+    );
+
+    scalar residual(gMax(residualField));
+
+    Info<< "THERMO: iteration " << (tCorr + 1)
+        << " residual: " << residual  << endl;
+    if (residual < resT)
+    {
+        break;
+    }
+}
+
+
+
 }

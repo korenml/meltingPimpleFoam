@@ -17,6 +17,19 @@ volScalarField rho
     thermo.rho()
 );
 
+volScalarField h
+(
+    IOobject
+    (
+        "h",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    thermo.he()
+);
+
 volScalarField& p = thermo.p();
 
 Info<< "Reading field U\n" << endl;
@@ -137,24 +150,31 @@ IOdictionary smProperties
 		IOobject::NO_WRITE
 	)
 );
+
+//label nThermoCorr(smProperties.lookup("nCorrectorT"));
+int nThermoCorr = 10;
+//label resT(smProperties.lookup("residualT"));
+float resT = 1e-4;
+
 // Reading heat of fusion
-dimensionedScalar L(smProperties.lookup("L"));
+dimensionedScalar L("L", dimensionSet(0, 2, -2, 0, 0, 0, 0), smProperties.get<scalar>("L"));
 // Reading solid heat capacity
-dimensionedScalar cpS(smProperties.lookup("cp"));
+dimensionedScalar cpS("cpS", dimensionSet(0, 2, -2, -1, 0, 0, 0), smProperties.get<scalar>("cpS"));
 // Reading thermal conductivity
-dimensionedScalar lambdaS(smProperties.lookup("lambdaS"));
+dimensionedScalar lambdaS("lambdaS", dimensionSet(1, 1, -3, -1, 0, 0, 0), smProperties.get<scalar>("lambdaS"));
 // Reading melting temperature
-dimensionedScalar Tmelt(smProperties.lookup("Tmelt"));
+dimensionedScalar Tmelt("Tmelt", dimensionSet(0, 0, 0, 1, 0, 0, 0), smProperties.get<scalar>("Tmelt"));
+// Reading melting temperature difference
+dimensionedScalar deltaT("deltaT", dimensionSet(0, 0, 0, 1, 0, 0, 0), smProperties.get<scalar>("deltaT"));
+dimensionedScalar Tdim("Tdim", dimensionSet(0, 0, 0, 1, 0, 0, 0), smProperties.get<scalar>("Tdim"));
+dimensionedScalar TS = Tmelt - 0.5*deltaT;
+dimensionedScalar TL = Tmelt + 0.5*deltaT;
 // Reading mushy region momentum sink coefficient default is 1e5
-dimensionedScalar Cu(smProperties.lookup("Cu"));
+dimensionedScalar Cu("Cu", dimensionSet(0, 0, -1, 0, 0, 0, 0), smProperties.getOrDefault<scalar>("Cu", 1e5));
 // Reading porosity coefficient
-dimensionedScalar qD(smProperties.lookup("qD"));
+dimensionedScalar qD("qD", dimensionSet(0, 0, 0, 0, 0, 0, 0), smProperties.getOrDefault<scalar>("qD", 1e-3));
 // Reading relaxation coefficient 0.9
-dimensionedScalar relaxAlpha(smProperties.lookup("relaxAlpha"));
-// Reading reference density
-dimensionedScalar rhoRef(smProperties.lookup("rhoRef"));
-// Reading beta coeff
-dimensionedScalar beta(smProperties.lookup("beta"));
+dimensionedScalar relaxAlpha("relaxAlpha", dimensionSet(0, 0, 0, 0, 0, 0, 0), smProperties.getOrDefault<scalar>("relaxAlpha", 0.9));
 // Creating momentum sink term
 volScalarField DCu
 (
