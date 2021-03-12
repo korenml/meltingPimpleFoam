@@ -151,10 +151,10 @@ IOdictionary smProperties
 	)
 );
 
-//label nThermoCorr(smProperties.lookup("nCorrectorT"));
-int nThermoCorr = 10;
+scalar nCorrectorT(smProperties.getOrDefault<scalar>("nCorrectorT", 100));
+//int nCorrectorT = 10;
 //label resT(smProperties.lookup("residualT"));
-float resT = 1e-4;
+scalar residualT(smProperties.getOrDefault<scalar>("residualT", 1e-4));
 
 // Reading heat of fusion
 dimensionedScalar L("L", dimensionSet(0, 2, -2, 0, 0, 0, 0), smProperties.get<scalar>("L"));

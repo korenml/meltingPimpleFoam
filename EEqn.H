@@ -1,5 +1,5 @@
 {
-for (int tCorr=0; tCorr<nThermoCorr; tCorr++)
+for (int tCorr=0; tCorr<nCorrectorT; tCorr++)
 {
 
     volScalarField& he = thermo.he();
@@ -53,7 +53,7 @@ for (int tCorr=0; tCorr<nThermoCorr; tCorr++)
 
     Info<< "THERMO: iteration " << (tCorr + 1)
         << " residual: " << residual  << endl;
-    if (residual < resT)
+    if (residual < residualT)
     {
         break;
     }
